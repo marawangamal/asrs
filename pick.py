@@ -1,0 +1,93 @@
+#!/usr/bin/env python3
+"""Pick the next card to review. Prints one relative card path to stdout.
+
+Usage: python3 pick.py [deck_name]
+Vault root is the script's directory. Pass a deck name (e.g. "coding") to
+restrict selection to that deck.
+"""
+from __future__ import annotations
+
+import math
+import os
+import random
+import re
+import sys
+from datetime import datetime, timezone
+from pathlib import Path
+
+GRADE_MULTIPLIER = {"again": 0.5, "hard": 1.0, "good": 2.5, "easy": 5.0}
+HEADER_RE = re.compile(
+    r"^##\s+(?P<ts>\S+)\s+—\s+(?P<path>\S+)\s+—\s+(?P<grade>again|hard|good|easy)\s*$"
+)
+
+
+def find_decks(root: Path) -> list[Path]:
+    return sorted(p for p in root.iterdir() if p.is_dir() and (p / "index.md").is_file())
+
+
+def find_cards(deck: Path) -> list[Path]:
+    return sorted(p for p in deck.iterdir() if p.is_file() and p.suffix == ".md" and p.name != "index.md")
+
+
+def parse_history(history_path: Path) -> dict[str, tuple[datetime, str]]:
+    """Return {relative_card_path: (last_timestamp, last_grade)}."""
+    latest: dict[str, tuple[datetime, str]] = {}
+    if not history_path.is_file():
+        return latest
+    for line in history_path.read_text().splitlines():
+        m = HEADER_RE.match(line)
+        if not m:
+            continue
+        try:
+            ts = datetime.fromisoformat(m["ts"])
+        except ValueError:
+            continue
+        if ts.tzinfo is None:
+            ts = ts.replace(tzinfo=timezone.utc)
+        path = m["path"]
+        grade = m["grade"]
+        prev = latest.get(path)
+        if prev is None or ts > prev[0]:
+            latest[path] = (ts, grade)
+    return latest
+
+
+def score(now: datetime, last: tuple[datetime, str] | None) -> float:
+    if last is None:
+        return math.inf
+    ts, grade = last
+    days = (now - ts).total_seconds() / 86400.0
+    return days / GRADE_MULTIPLIER[grade]
+
+
+def main() -> int:
+    root = Path(__file__).resolve().parent
+    deck_filter = sys.argv[1] if len(sys.argv) > 1 else None
+    history = parse_history(root / "history.md")
+    now = datetime.now(timezone.utc)
+
+    decks = find_decks(root)
+    if deck_filter:
+        decks = [d for d in decks if d.name == deck_filter]
+        if not decks:
+            print(f"No deck named {deck_filter!r}.", file=sys.stderr)
+            return 1
+
+    candidates: list[tuple[float, str]] = []
+    for deck in decks:
+        for card in find_cards(deck):
+            rel = card.relative_to(root).as_posix()
+            candidates.append((score(now, history.get(rel)), rel))
+
+    if not candidates:
+        print("No cards found.", file=sys.stderr)
+        return 1
+
+    best = max(s for s, _ in candidates)
+    tied = [p for s, p in candidates if s == best]
+    print(random.choice(tied))
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())

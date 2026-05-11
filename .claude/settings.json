@@ -2,7 +2,8 @@
   "permissions": {
     "allow": [
       "Edit(history.md)",
-      "Write(history.md)"
+      "Write(history.md)",
+      "Bash(python3 pick.py)"
     ]
   }
 }
