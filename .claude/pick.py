@@ -25,8 +25,39 @@ def find_decks(root: Path) -> list[Path]:
     return sorted(p for p in root.iterdir() if p.is_dir() and (p / "index.md").is_file())
 
 
+def parse_inactive(index_path: Path) -> set[str]:
+    """Parse the `inactive:` list from a deck's index.md. Returns card filenames."""
+    if not index_path.is_file():
+        return set()
+    inactive: set[str] = set()
+    in_block = False
+    for raw in index_path.read_text().splitlines():
+        stripped = raw.strip()
+        if not in_block:
+            if stripped.startswith("inactive:"):
+                in_block = True
+                rest = stripped[len("inactive:"):].strip()
+                if rest:
+                    for item in rest.split(","):
+                        item = item.strip()
+                        if item:
+                            inactive.add(item)
+            continue
+        if stripped.startswith("- "):
+            inactive.add(stripped[2:].strip())
+        elif stripped == "" or stripped.startswith("#"):
+            continue
+        else:
+            in_block = False
+    return inactive
+
+
 def find_cards(deck: Path) -> list[Path]:
-    return sorted(p for p in deck.iterdir() if p.is_file() and p.suffix == ".md" and p.name != "index.md")
+    inactive = parse_inactive(deck / "index.md")
+    return sorted(
+        p for p in deck.iterdir()
+        if p.is_file() and p.suffix == ".md" and p.name != "index.md" and p.name not in inactive
+    )
 
 
 def parse_history(history_path: Path) -> dict[str, tuple[datetime, str]]:
