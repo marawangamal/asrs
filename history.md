@@ -1,5 +1,11 @@
 # Review history
 
+## 2026-05-11T19:45 — code/208-implement-trie.md — again
+Got the basic tree idea but stated O(n log n) complexity instead of O(n); missed the critical `is_end` flag that distinguishes a complete word from a prefix during `search`.
+
+## 2026-05-11T19:30 — code/11-container-with-most-water.md — again
+No attempt. Core idea to drill: two pointers from both ends, always move the shorter pointer inward — moving the taller one can never improve the area since the bound is the shorter line and width only decreases.
+
 ## 2026-05-11T19:23 — code/209-min-subarray-sum.md — again
 User had no recall at all ("I dont know"). Next time, prompt them on the variable-size sliding window pattern: expand right to grow sum, contract left while sum ≥ target. Key constraint to remember: works only because all values are positive (monotone window).
 
