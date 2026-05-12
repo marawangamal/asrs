@@ -1,14 +1,17 @@
 #!/usr/bin/env python3
-"""Pick the next card to review. Prints one relative card path to stdout.
+"""Pick next card(s) to review. Prints relative card path(s) to stdout, one per line.
 
-Usage: python3 .claude/pick.py [deck_name]
-Vault root is the script's parent directory. Pass a deck name (e.g. "coding")
-to restrict selection to that deck.
+Usage: python3 .claude/pick.py [deck_filter] [--count N]
+
+Vault root is the script's parent directory. Decks are any directory containing
+an index.md (searched recursively). Pass a deck filter as either the deck name
+(e.g. "algos") or its relative path (e.g. "code/algos"). Pass --count N to print
+the top N due cards instead of just one.
 """
 from __future__ import annotations
 
+import argparse
 import math
-import os
 import random
 import re
 import sys
@@ -19,10 +22,26 @@ GRADE_MULTIPLIER = {"again": 0.5, "hard": 1.0, "good": 2.5, "easy": 5.0}
 HEADER_RE = re.compile(
     r"^##\s+(?P<ts>\S+)\s+—\s+(?P<path>\S+)\s+—\s+(?P<grade>again|hard|good|easy)\s*$"
 )
+SKIP_DIRS = {"__pycache__", "node_modules", ".venv", ".git"}
+MAX_DEPTH = 4
 
 
 def find_decks(root: Path) -> list[Path]:
-    return sorted(p for p in root.iterdir() if p.is_dir() and (p / "index.md").is_file())
+    """Find all dirs containing index.md, recursively. Don't descend into a deck."""
+    decks: list[Path] = []
+
+    def walk(path: Path, depth: int) -> None:
+        if depth > MAX_DEPTH:
+            return
+        if path != root and (path / "index.md").is_file():
+            decks.append(path)
+            return
+        for child in sorted(path.iterdir()):
+            if child.is_dir() and child.name not in SKIP_DIRS and not child.name.startswith("."):
+                walk(child, depth + 1)
+
+    walk(root, 0)
+    return decks
 
 
 def parse_inactive(index_path: Path) -> set[str]:
@@ -91,17 +110,29 @@ def score(now: datetime, last: tuple[datetime, str] | None) -> float:
     return days / GRADE_MULTIPLIER[grade]
 
 
+def deck_matches(deck: Path, filter_str: str, root: Path) -> bool:
+    rel = deck.relative_to(root).as_posix()
+    norm = filter_str.strip("/")
+    return rel == norm or deck.name == norm
+
+
 def main() -> int:
+    parser = argparse.ArgumentParser()
+    parser.add_argument("deck", nargs="?", default=None,
+                        help="Deck name or relative path filter (e.g. 'algos' or 'code/algos').")
+    parser.add_argument("--count", type=int, default=1,
+                        help="Number of cards to print (top-N by staleness). Default 1.")
+    args = parser.parse_args()
+
     root = Path(__file__).resolve().parent.parent
-    deck_filter = sys.argv[1] if len(sys.argv) > 1 else None
     history = parse_history(root / "history.md")
     now = datetime.now(timezone.utc)
 
     decks = find_decks(root)
-    if deck_filter:
-        decks = [d for d in decks if d.name == deck_filter]
+    if args.deck:
+        decks = [d for d in decks if deck_matches(d, args.deck, root)]
         if not decks:
-            print(f"No deck named {deck_filter!r}.", file=sys.stderr)
+            print(f"No deck matching {args.deck!r}.", file=sys.stderr)
             return 1
 
     candidates: list[tuple[float, str]] = []
@@ -114,9 +145,11 @@ def main() -> int:
         print("No cards found.", file=sys.stderr)
         return 1
 
-    best = max(s for s, _ in candidates)
-    tied = [p for s, p in candidates if s == best]
-    print(random.choice(tied))
+    # Shuffle first so ties break randomly, then stable-sort by score desc.
+    random.shuffle(candidates)
+    candidates.sort(key=lambda x: x[0], reverse=True)
+    for _, path in candidates[: max(1, args.count)]:
+        print(path)
     return 0
 
 
