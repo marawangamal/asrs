@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 """Pick the next card to review. Prints one relative card path to stdout.
 
-Usage: python3 pick.py [deck_name]
-Vault root is the script's directory. Pass a deck name (e.g. "coding") to
-restrict selection to that deck.
+Usage: python3 .claude/pick.py [deck_name]
+Vault root is the script's parent directory. Pass a deck name (e.g. "coding")
+to restrict selection to that deck.
 """
 from __future__ import annotations
 
@@ -61,7 +61,7 @@ def score(now: datetime, last: tuple[datetime, str] | None) -> float:
 
 
 def main() -> int:
-    root = Path(__file__).resolve().parent
+    root = Path(__file__).resolve().parent.parent
     deck_filter = sys.argv[1] if len(sys.argv) > 1 else None
     history = parse_history(root / "history.md")
     now = datetime.now(timezone.utc)

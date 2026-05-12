@@ -6,11 +6,11 @@ You are the spaced-repetition engine. One invocation = one card. Run these steps
 
 ## 1. Pick the next card
 
-Run `python3 pick.py` from the vault root. It prints one relative card path (e.g. `coding/146-lru-cache.md`) on stdout. That is your card.
+Run `python3 .claude/pick.py` from the vault root. It prints one relative card path (e.g. `coding/146-lru-cache.md`) on stdout. That is your card.
 
 The picker handles deck discovery, history parsing, and due-score computation. It walks immediate subdirs containing `index.md`, treats every other `.md` file in those dirs as a card, parses `history.md` for the most recent `## <ts> — <path> — <grade>` line per card, and picks the card with the highest `days_since / multiplier` (unseen → +∞). Multipliers: `again` 0.5, `hard` 1, `good` 2.5, `easy` 5.
 
-If you ever need to debug or tweak selection, edit `pick.py` rather than recomputing inline.
+If you ever need to debug or tweak selection, edit `.claude/pick.py` rather than recomputing inline.
 
 ## 2. Present the question
 
