@@ -55,7 +55,7 @@ Multipliers: `again` 0.5, `hard` 1, `good` 2.5, `easy` 5. Ties are broken
 randomly.
 
 If you ever need to debug or tweak selection/session logic, edit
-`.claude/pick.py` or `.claude/session.py` rather than recomputing inline.
+`.claude/session.py` rather than recomputing inline.
 
 ## 2. Present the question
 
