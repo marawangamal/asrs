@@ -21,10 +21,11 @@ class Vocab:
           count order; ties broken by token (alphabetical).
         - Tokens with count < min_count are dropped.
         """
+        # breakpoint()
         kept = [(t, c) for t, c in tokens if c >= min_count]
         kept.sort(key=lambda tc: (-tc[1], tc[0]))
         self.id_to_token = [Vocab.UNK] + [t for t, _ in kept]
-        self.token_to_id = {t: i for i, (t, _) in enumerate(kept)}
+        self.token_to_id = {t: i for i, t in enumerate(self.id_to_token)}
 
     def __len__(self):
         return len(self.id_to_token)
@@ -33,7 +34,7 @@ class Vocab:
         """Whitespace-tokenize `text` and return a list of ids. Tokens
         not in the vocabulary map to UNK (id 0).
         """
-        return [self.token_to_id[w] for w in text.split()]
+        return [self.token_to_id.get(w, 0) for w in text.split()]
 
     def decode(self, ids):
         """Inverse of encode: ids -> space-joined tokens."""

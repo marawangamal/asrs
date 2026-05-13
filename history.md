@@ -26,3 +26,6 @@ Nailed addScore (dict + get-or-init). Right approach for top (sort-on-query) but
 
 ## 2026-05-11T19:55 — code/algos/3-longest-substring-no-repeat.md — again
 User had no answer. Core idea to remember: variable-size sliding window with a hash map storing each character's most recent index; jump `left` to `seen[ch] + 1` when a duplicate is found inside the current window.
+
+## 2026-05-13T23:14 — code/algos/anthropic-tokenizer.md — hard
+Got the core two-pointer greedy-longest-match structure (outer i, inner j shrinking from right). Missed: UNK fallback when j shrinks to i with no match, resetting j after each match, and both follow-ups (max-length pruning, UNK collapsing). Next time push for the UNK emit-and-advance branch explicitly.
