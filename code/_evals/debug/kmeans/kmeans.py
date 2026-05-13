@@ -20,7 +20,7 @@ import numpy as np
 
 class KMeansResult(NamedTuple):
     centers: np.ndarray  # shape (K, D)
-    labels: np.ndarray   # shape (N,)
+    labels: np.ndarray  # shape (N,)
     n_iter: int
 
 
@@ -29,7 +29,7 @@ def init_centers(X, k, seed=0):
     at random. Returns a (k, D) float array (a copy)."""
     rng = np.random.RandomState(seed)
     n = X.shape[0]
-    idx = rng.choice(n, size=k, replace=True)
+    idx = rng.choice(n, size=k, replace=False)
     return X[idx].copy().astype(float)
 
 
@@ -38,8 +38,8 @@ def assign_labels(X, centers):
 
     X: (N, D), centers: (K, D). Returns (N,) int labels in [0, K).
     """
-    diff = X[:, None, :] - centers[None, :, :]  # (N, K, D)
-    sq_dist = (diff ** 2).sum(axis=-1)          # (N, K)
+    diff = X[None, :, :] - centers[:, None, :]  # (N, K, D)
+    sq_dist = (diff**2).sum(axis=-1)  # (N, K)
     return np.argmin(sq_dist, axis=0)
 
 
@@ -54,7 +54,9 @@ def update_centers(X, labels, k):
     sums = np.zeros((k, d))
     for c in range(k):
         sums[c] = X[labels == c].sum(axis=0)
-    return sums / counts[:, None]
+    return sums / np.where(
+        counts[:, None] > 0, counts[:, None], np.ones_like(counts[:, None])
+    )
 
 
 def kmeans(X, k, n_iter, seed=0):
