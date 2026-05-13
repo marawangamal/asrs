@@ -17,12 +17,13 @@ def softmax(logits):
     """Stable softmax over the last axis. Input shape (..., C)."""
     shifted = logits - np.max(logits, axis=-1, keepdims=True)
     exp = np.exp(shifted)
-    return exp / np.sum(exp, axis=-1)
+    return exp / np.sum(exp, axis=-1, keepdims=True)
 
 
 def log_softmax(logits):
     """Stable log-softmax over the last axis. Input shape (..., C)."""
-    return logits - np.log(np.sum(np.exp(logits), axis=-1, keepdims=True))
+    M = np.max(logits, axis=-1, keepdims=True)
+    return logits - M - np.log(np.sum(np.exp(logits - M), axis=-1, keepdims=True))
 
 
 def cross_entropy(logits, labels):
@@ -34,7 +35,7 @@ def cross_entropy(logits, labels):
     """
     log_probs = log_softmax(logits)
     n = logits.shape[0]
-    return -np.mean(log_probs[labels, np.arange(n)])
+    return -np.mean(log_probs[np.arange(n), labels])
 
 
 def top_k_accuracy(logits, labels, k):
@@ -43,5 +44,5 @@ def top_k_accuracy(logits, labels, k):
     logits: (N, C), labels: (N,) int.
     """
     sorted_idx = np.argsort(logits, axis=-1)
-    topk = sorted_idx[:, :k]
+    topk = sorted_idx[:, -k:]  # (N, K)
     return np.mean(np.any(topk == labels[:, None], axis=-1))
