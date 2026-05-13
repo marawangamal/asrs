@@ -163,6 +163,64 @@ def cmd_grade(args: argparse.Namespace) -> int:
     return 0
 
 
+def cmd_regrade(args: argparse.Namespace) -> int:
+    """Replace the latest studylog row for a card with a new grade.
+
+    Deletes the most-recent row for the card's content-hash card_id, then
+    re-applies the FSRS transition from the now-latest prior state using the
+    deleted row's original timestamp (preserves elapsed-time semantics).
+    Leaves session.json untouched — regrade does not advance the session.
+    history.md is not modified; fix the matching entry there separately.
+    """
+    grade_int = sched.GRADE_NAME_TO_INT.get(args.grade.lower())
+    if grade_int is None:
+        sys.exit(f"Bad grade {args.grade!r}; expected one of {list(sched.GRADE_NAME_TO_INT)}.")
+
+    card_rel = args.card.strip()
+    card_path = ROOT / card_rel
+    if not card_path.is_file():
+        sys.exit(f"Card not found: {card_rel}")
+    deck_dir = card_path.parent
+    card_id = cards_mod.card_id_for(card_path, deck_dir)
+
+    conn = db_mod.connect(DB_PATH)
+    try:
+        row = conn.execute(
+            "SELECT study_id, timestamp, grade FROM studylog "
+            "WHERE card_id = ? ORDER BY study_id DESC LIMIT 1",
+            (card_id,),
+        ).fetchone()
+        if row is None:
+            sys.exit(f"No studylog row to regrade for {card_rel}.")
+        old_study_id, old_ts_str, old_grade = row
+        conn.execute("DELETE FROM studylog WHERE study_id = ?", (old_study_id,))
+        # Re-apply transition from the now-latest prior state (post-DELETE).
+        prev = db_mod.latest_state(conn, card_id)
+        prev_sv = prev[0] if prev else None
+        review_dt = datetime.fromisoformat(old_ts_str)
+        if review_dt.tzinfo is None:
+            review_dt = review_dt.replace(tzinfo=timezone.utc)
+        new_sv = sched.transition(prev_sv, grade_int, review_dt)
+        db_mod.insert_review(
+            conn,
+            card_id=card_id,
+            timestamp=review_dt,
+            state_vector_json=new_sv,
+            state_type=sched.STATE_TYPE,
+            grade=grade_int,
+        )
+    finally:
+        conn.close()
+
+    print(json.dumps({
+        "regraded": card_rel,
+        "old_grade": sched.GRADE_INT_TO_NAME.get(old_grade, str(old_grade)),
+        "new_grade": args.grade.lower(),
+        "timestamp": old_ts_str,
+    }, indent=2))
+    return 0
+
+
 def cmd_debug(args: argparse.Namespace) -> int:
     card_rel = args.card.strip()
     card_path = ROOT / card_rel
@@ -216,6 +274,14 @@ def main() -> int:
     p.add_argument("--card", required=True, help="Relative card path.")
     p.add_argument("--grade", required=True, help="again|hard|good|easy")
     p.set_defaults(func=cmd_grade)
+
+    p = sub.add_parser(
+        "regrade",
+        help="Replace the latest studylog row for a card with a new grade.",
+    )
+    p.add_argument("--card", required=True, help="Relative card path.")
+    p.add_argument("--grade", required=True, help="again|hard|good|easy")
+    p.set_defaults(func=cmd_regrade)
 
     p = sub.add_parser("debug", help="Print current state + due date for a card.")
     p.add_argument("--card", required=True, help="Relative card path.")
