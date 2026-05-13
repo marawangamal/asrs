@@ -99,3 +99,4 @@ Passes once, fails on rerun                    -> F (shared state)
 | `tree_fns`, `recursion_easy`/`_medium`/`_hard`            | E, F            |
 | `graph_recursion`                                         | E, F            |
 | `vocab`                                                   | C, D            |
+| `decision_tree`                                           | C, G + E        |
