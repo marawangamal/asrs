@@ -12,10 +12,12 @@ Hint: 1 bug per function. Watch for:
 """
 
 
-def has_path(graph, start, end, visited=set()):
+def has_path(graph, start, end, visited=None):
     """Return True iff there's a directed path from `start` to `end`."""
     if start == end:
         return True
+    if visited is None:
+        visited = set()
     visited.add(start)
     for nbr in graph.get(start, []):
         if nbr in visited:
@@ -38,10 +40,11 @@ def count_components(graph):
             if nbr not in visited:
                 dfs(nbr, visited)
 
+    visited = set()
     for start in graph:
-        visited = set()
-        dfs(start, visited)
-        count += 1
+        if start not in visited:
+            dfs(start, visited)
+            count += 1
     return count
 
 
@@ -52,8 +55,8 @@ def has_cycle(graph):
     def dfs(node):
         if node in visited:
             return True
-        visited.add(node)
         for nbr in graph.get(node, []):
+            visited.add(node)
             if dfs(nbr):
                 return True
         return False
