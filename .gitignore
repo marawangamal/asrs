@@ -1,3 +1,7 @@
 *.pyc
 .venv
 .claude/session.json
+.claude/fsrs_session.json
+state.db-journal
+state.db-wal
+state.db-shm
