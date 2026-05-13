@@ -6,10 +6,11 @@ You are turning the current conversation into a single new study card in this va
 
 ## 1. Pick the deck
 
-Infer the deck from the conversation. The vault has three decks at the repo root:
+Infer the deck from the conversation. The vault has these decks at the repo root:
 
 - `code/algos/` — LeetCode / coding-interview problems. Heading style uses `## Number`, `### Problem`, `### Solution`, `### Source`.
 - `code/ml/` — ML / NumPy / modelling patterns. Heading style uses `## Tags`, `### Problem`, `### Solution`, `### Source` (no `## Number`).
+- `code/basics/` — Basic python, recursion. Heading style uses `## Tags`, `### Problem`, `### Solution`, `### Source` (no `## Number`).
 - `math/` — math / optimization / analysis. Heading style uses `## Topic`, `### Question`, `### Answer`.
 
 Use the recent discussion to choose:
