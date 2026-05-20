@@ -2,6 +2,8 @@
 
 An agentic spaced-repetition system for **machine learning scientist** interviews. Write notes as markdown, then `/study`. Claude quizzes you, grades your answer.
 
+<p align="center"><img src="image.png" alt="alt text" width="50%"></p>
+
 ## Quickstart
 
 ```bash
