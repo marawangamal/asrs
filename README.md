@@ -1,8 +1,8 @@
 # interviews
 
-A flashcard vault for interview prep. Cards are markdown files; reviews are scheduled by a spaced-repetition algorithm. There are two pickers — a simple multiplier-based one (`/study`) and an FSRS-backed one (`/study-fsrs`) — and a `/note` skill for turning conversations into new cards.
+An AI spaced repetition system for interview prep. Place your notes in markdown files then run `\study`. Claude will test you on your notes and grade your score. Claude selects questions based on how good your previous answers were (saved in `history.md`).For a more advanced spaced repetition algorithm use `/study-fsrs`
 
-## Vault layout
+## Notes layout
 
 ```
 interviews/
@@ -13,8 +13,7 @@ interviews/
 │   │   ├── 211-add-search-words.md
 │   │   └── …
 │   ├── ml/         deck — ML / NumPy patterns
-│   ├── basics/     deck — Python fundamentals
-│   └── _evals/     scratch space, not a deck
+│   └── basics/     deck — Python fundamentals
 ├── math/           deck — optimization / analysis
 ├── history.md      append-only review log (used by /study + /study-fsrs)
 ├── state.db        SQLite — FSRS scheduler state (used by /study-fsrs only)
@@ -28,16 +27,16 @@ interviews/
 └── pyproject.toml
 ```
 
-A **deck** is any directory containing an `index.md`. The index declares the per-card heading names used by the picker and skill:
+A **deck** is any directory containing an `index.md`. The index declares the per-note heading names used by the picker and skill:
 
 ```
 question: ### Problem
 answer: ### Solution
 inactive:
-  - 3-longest-substring-no-repeat.md   ← cards excluded from scheduling
+  - 3-longest-substring-no-repeat.md   ← note excluded from scheduling
 ```
 
-A **card** is any `.md` file in a deck directory (except `index.md` and anything in the deck's `inactive:` list). Card structure is per-deck — `code/algos/*.md` use `### Problem` / `### Solution`, `math/*.md` use `### Question` / `### Answer`.
+A **note** is any `.md` file in a deck directory (except `index.md` and anything in the deck's `inactive:` list). Card structure is per-deck — `code/algos/*.md` use `### Problem` / `### Solution`, `math/*.md` use `### Question` / `### Answer`.
 
 ## Skills
 
@@ -45,12 +44,12 @@ Run via `/<name>` in the Claude Code CLI.
 
 | Skill          | What it does                                                                    |
 | -------------- | ------------------------------------------------------------------------------- |
-| `/note`        | Turn the current conversation into a new card. Picks the deck, matches the deck's existing style. |
-| `/study`       | Quiz one card from a 10-card batch. Picker uses `days_since / multiplier`.      |
+| `/note`        | Turn the current conversation into a new note. Picks the deck, matches the deck's existing style. |
+| `/study`       | Quiz one note from a 10-card batch. Picker uses `days_since / multiplier`.      |
 | `/study-fsrs`  | Same UX as `/study` but the picker uses the FSRS algorithm.                     |
 
 Both study skills:
-- One card per `/study(-fsrs)` invocation.
+- One note per `/study(-fsrs)` invocation.
 - Grade as `again` / `hard` / `good` / `easy`.
 - Append a `## <ts> — <path> — <grade>` block to `history.md` with a 1–3 sentence note.
 - Accept an optional deck filter: `/study-fsrs code/algos` or `/study-fsrs math`.
