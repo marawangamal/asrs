@@ -1,4 +1,4 @@
-# Agentic Spaced-Repetition
+# asrs: agentic spaced-repetition
 
 An agentic spaced-repetition system for **machine learning scientist** interviews. Write notes as markdown, then `/study`. Claude quizzes you, grades your answer.
 
