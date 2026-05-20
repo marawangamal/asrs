@@ -1,2 +1,0 @@
-question: ### Question
-answer: ### Answer
