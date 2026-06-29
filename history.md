@@ -29,3 +29,6 @@ User had no answer. Core idea to remember: variable-size sliding window with a h
 
 ## 2026-05-13T23:14 — code/algos/anthropic-tokenizer.md — hard
 Got the core two-pointer greedy-longest-match structure (outer i, inner j shrinking from right). Missed: UNK fallback when j shrinks to i with no match, resetting j after each match, and both follow-ups (max-length pruning, UNK collapsing). Next time push for the UNK emit-and-advance branch explicitly.
+
+## 2026-06-06T00:00 — code/algos/981-time-based-kv-store.md — again
+Got the structure (dict str->list, bisect_right, step back one) but fell into the exact card gotcha: used max(0, idx-1) instead of `if idx==0: return ""`. Also hand-rolled bisect_right was broken — never used the search val (compared arr[mid] >= arr[left]) and left=mid with left<=right infinite-loops.

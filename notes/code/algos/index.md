@@ -12,6 +12,7 @@ inactive:
   - 432-all-oone.md
   - 460-lfu-cache.md
   - 692-top-k-frequent-words.md
+  - 705-design-hashset.md
   - 933-recent-calls.md
   - 1114-print-in-order.md
   - 1116-print-zero-even-odd.md
