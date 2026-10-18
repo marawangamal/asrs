@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Task Arithmetic Repository Structure</title>
+  <style>
+    :root { color-scheme: light; }
+    body {
+      margin: 2rem;
+      background: #ffffff;
+      color: #24292f;
+      font: 16px/1.55 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    }
+    pre {
+      display: inline-block;
+      padding: 1.5rem 2rem;
+      border: 1px solid #d0d7de;
+      border-radius: 10px;
+      background: #f6f8fa;
+    }
+    .new-behaviour { color: #ff7b72; font-weight: 700; }
+    .new-steered-model { color: #8250df; font-weight: 700; }
+    .note { max-width: 520px; color: #57606a; font: 14px/1.4 system-ui, sans-serif; }
+  </style>
+</head>
+<body>
+  <h1>Repository structure</h1>
+  <pre>artifacts/
+├── models/
+│   ├── deception/
+│   │   └── Qwen3.6-27B-v12-steered-alpha=0.2/
+│   │       └── model files
+│   └── <span class="new-behaviour">NEW_BEHAVIOUR/</span>
+│       └── <span class="new-steered-model">NEW_STEERED_MODEL/</span>
+│           └── model files
+│
+└── evals/
+    ├── deception/
+    │   └── Qwen3.6-27B-v12-steered-alpha=0.2/
+    │       └── results.json
+    └── <span class="new-behaviour">NEW_BEHAVIOUR/</span>
+        └── <span class="new-steered-model">NEW_STEERED_MODEL/</span>
+            └── results.json
+
+scripts/
+├── deception/
+│   ├── 01_finetune.sbatch
+│   └── 02_eval.sbatch
+└── <span class="new-behaviour">NEW_BEHAVIOUR/</span>
+    └── ...</pre>
+  <p class="note"><span class="new-behaviour">NEW_BEHAVIOUR</span> marks a behavior extension.<br><span class="new-steered-model">NEW_STEERED_MODEL</span> marks a new steered model.</p>
+</body>
+</html>
