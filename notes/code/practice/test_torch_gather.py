@@ -1,6 +1,10 @@
 import torch
 
-from torch_gather import completion_log_probs, next_token_log_probs
+from torch_gather import (
+    completion_log_probs,
+    next_token_log_probs,
+    token_ids_to_one_hot,
+)
 
 
 def test_next_token_log_probs_uses_the_shifted_target_tokens() -> None:
@@ -72,3 +76,20 @@ def test_next_token_log_probs_preserves_gradient_flow() -> None:
     assert logits.grad is not None
     assert torch.count_nonzero(logits.grad[:, :-1]) > 0
     torch.testing.assert_close(logits.grad[:, -1], torch.zeros_like(logits.grad[:, -1]))
+
+
+def test_token_ids_to_one_hot() -> None:
+    input_ids = torch.tensor([[0, 2, 1], [3, 1, 3]])
+
+    actual = token_ids_to_one_hot(input_ids, vocab_size=4)
+    expected = torch.tensor(
+        [
+            [[1.0, 0.0, 0.0, 0.0], [0.0, 0.0, 1.0, 0.0], [0.0, 1.0, 0.0, 0.0]],
+            [[0.0, 0.0, 0.0, 1.0], [0.0, 1.0, 0.0, 0.0], [0.0, 0.0, 0.0, 1.0]],
+        ]
+    )
+
+    assert actual.shape == (2, 3, 4)
+    assert actual.dtype.is_floating_point
+    assert actual.device == input_ids.device
+    torch.testing.assert_close(actual, expected)

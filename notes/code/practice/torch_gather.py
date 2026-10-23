@@ -23,8 +23,16 @@ vocabulary size.
    ``[B]``.
 
 Use ``torch.gather`` and do not use Python loops.
+
+Second example: ``torch.scatter``
+---------------------------------
+Implement ``token_ids_to_one_hot``. Given ``input_ids`` with shape ``[B, T]``
+and a vocabulary size ``V``, return a floating-point one-hot tensor with shape
+``[B, T, V]``. Use ``torch.scatter``; do not use ``torch.nn.functional.one_hot``
+or Python loops.
 """
 
+import torch
 from torch import Tensor
 
 
@@ -50,3 +58,8 @@ def completion_log_probs(
     # (B, T, 1) ->  (B, T) ->  (B,)
     logp_y = (logp_y.squeeze(-1) * completion_mask).sum(dim=-1)
     return logp_y
+
+
+def token_ids_to_one_hot(input_ids: Tensor, vocab_size: int) -> Tensor:
+    """Return a floating-point one-hot representation with shape ``[B, T, V]``."""
+    raise NotImplementedError
