@@ -16,7 +16,7 @@ position. Assume ``D`` is divisible by ``num_heads``. Do not use
 
 import math
 import torch
-from torch import Tensor
+from torch import Tensor, triu
 
 
 def self_attention(
@@ -24,28 +24,24 @@ def self_attention(
     query_weight: Tensor,  # (D, D)
     key_weight: Tensor,  # (D, D)
     value_weight: Tensor,  # (D, D)
-    output_weight: Tensor,
+    output_weight: Tensor,  # (D, D)
     causal: bool = False,
 ) -> Tensor:
     """Return single-head self-attention output with shape ``[B, T, D]``."""
     B, T, D = inputs.shape
-    q = torch.einsum("bti,io->bto", inputs, query_weight)
+    q = torch.einsum("bti,io->bto", inputs, query_weight)  # (B, T, D)
     k = torch.einsum("bti,io->bto", inputs, key_weight)
     v = torch.einsum("bti,io->bto", inputs, value_weight)
-    loga = torch.einsum("btd,bsd->bts", q, k)  # a[n, i, j] = <q_i, k_j>
 
-    # get causal mask
-    a_tilde = loga / math.sqrt(D)
+    a = torch.einsum("bsd,btd->bst", q, k)  # a[i, j] = <qi, kj>
+    a = a / math.sqrt(D)
     if causal:
-        m = torch.triu(
-            torch.ones(T, T, dtype=torch.bool, device=inputs.device),
-            diagonal=1,
-        )
-        a_tilde = a_tilde.masked_fill(m, float("-inf"))  # (B, T, T)
-    a = torch.softmax(a_tilde, dim=-1)  # (B, T, T)
-    o = torch.einsum("bts,bsd->btd", a, v)
-    proj = torch.einsum("bti,io->bto", o, output_weight)
-    return proj
+        m = torch.triu(torch.ones_like(a), 1) == 1
+        a = a.masked_fill(m, float("-inf"))
+    a = torch.softmax(a, dim=-1)
+
+    o = torch.einsum("bst,bti,io->bso", a, v, output_weight)
+    return o
 
 
 def multihead_attention(
@@ -59,30 +55,21 @@ def multihead_attention(
 ) -> Tensor:
     """Return multi-head self-attention output with shape ``[B, T, D]``."""
     B, T, D = inputs.shape
-    q = torch.einsum("bti,io->bto", inputs, query_weight)
+    q = torch.einsum("bti,io->bto", inputs, query_weight)  # (B, T, D)
     k = torch.einsum("bti,io->bto", inputs, key_weight)
     v = torch.einsum("bti,io->bto", inputs, value_weight)
 
-    # split heads
-    Nh = num_heads
-    Dh = D // Nh
-    q = q.reshape(B, T, Nh, Dh).permute(0, 2, 1, 3)  # (B, Nh, T, Dh)
-    k = k.reshape(B, T, Nh, Dh).permute(0, 2, 1, 3)  # (B, Nh, T, Dh)
-    v = v.reshape(B, T, Nh, Dh).permute(0, 2, 1, 3)  # (B, Nh, T, Dh)
+    q = q.reshape(B, T, num_heads, D // num_heads)
+    k = k.reshape(B, T, num_heads, D // num_heads)
+    v = v.reshape(B, T, num_heads, D // num_heads)
 
-    loga = torch.einsum("bhtd,bhsd->bhts", q, k)  # a[n, h, i, j] = <q_i, k_j>
-
-    # get causal mask
-    a_tilde = loga / math.sqrt(Dh)
+    a = torch.einsum("bshd,bthd->bhst", q, k)  # a[i, j] = <qi, kj>
+    a = a / math.sqrt(D // num_heads)
     if causal:
-        m = torch.triu(
-            torch.ones(T, T, dtype=torch.bool, device=inputs.device),
-            diagonal=1,
-        )
-        a_tilde = a_tilde.masked_fill(m, float("-inf"))  # (B, H, T, T)
-    a = torch.softmax(a_tilde, dim=-1)  # (B, H, T, T)
-    o = torch.einsum("bhts,bhsd->bhtd", a, v)
-    proj = torch.einsum(
-        "bti,io->bto", o.permute(0, 2, 1, 3).reshape(B, T, D), output_weight
-    )
-    return proj
+        m = torch.triu(torch.ones_like(a), 1) == 1
+        a = a.masked_fill(m, float("-inf"))
+    a = torch.softmax(a, dim=-1)
+
+    o_prime = torch.einsum("bhst,bthd->bshd", a, v)
+    o = torch.einsum("bti,io->bto", o_prime.reshape(B, T, D), output_weight)
+    return o
