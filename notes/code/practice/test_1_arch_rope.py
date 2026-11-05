@@ -1,6 +1,8 @@
+from importlib import import_module
+
 import torch
 
-from rope import apply_rope
+apply_rope = import_module("1_arch_rope").apply_rope
 
 
 def reference_rope(

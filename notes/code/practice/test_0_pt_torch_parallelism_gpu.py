@@ -1,4 +1,5 @@
 import os
+from importlib import import_module
 
 import pytest
 import torch
@@ -7,18 +8,17 @@ import torch.nn.functional as F
 from torch import nn
 from torch.nn.parallel import DistributedDataParallel
 
-from torch_parallelism_gpu import (
-    column_parallel_linear,
-    distribute_batch,
-    distributed_mean,
-    row_parallel_linear,
-    wrap_ddp,
-)
+torch_parallelism_gpu = import_module("0_pt_torch_parallelism_gpu")
+column_parallel_linear = torch_parallelism_gpu.column_parallel_linear
+distribute_batch = torch_parallelism_gpu.distribute_batch
+distributed_mean = torch_parallelism_gpu.distributed_mean
+row_parallel_linear = torch_parallelism_gpu.row_parallel_linear
+wrap_ddp = torch_parallelism_gpu.wrap_ddp
 
 
 pytestmark = pytest.mark.skipif(
     "RANK" not in os.environ,
-    reason="run with torchrun as shown in torch_parallelism_gpu.py",
+    reason="run with torchrun as shown in 0_pt_torch_parallelism_gpu.py",
 )
 
 

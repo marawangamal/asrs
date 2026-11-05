@@ -1,10 +1,11 @@
+from importlib import import_module
+
 import torch
 
-from torch_gather import (
-    completion_log_probs,
-    next_token_log_probs,
-    token_ids_to_one_hot,
-)
+torch_gather = import_module("0_pt_torch_gather")
+completion_log_probs = torch_gather.completion_log_probs
+next_token_log_probs = torch_gather.next_token_log_probs
+token_ids_to_one_hot = torch_gather.token_ids_to_one_hot
 
 
 def test_next_token_log_probs_uses_the_shifted_target_tokens() -> None:

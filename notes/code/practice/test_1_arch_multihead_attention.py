@@ -1,8 +1,11 @@
 import math
+from importlib import import_module
 
 import torch
 
-from multihead_attention import multihead_attention, self_attention
+attention = import_module("1_arch_multihead_attention")
+multihead_attention = attention.multihead_attention
+self_attention = attention.self_attention
 
 
 def reference_self_attention(

@@ -1,8 +1,9 @@
 import math
+from importlib import import_module
 
 import torch
 
-from gqa import grouped_query_attention
+grouped_query_attention = import_module("1_arch_gqa").grouped_query_attention
 
 
 def reference_gqa(

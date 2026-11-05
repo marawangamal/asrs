@@ -1,13 +1,14 @@
+from importlib import import_module
+
 import torch
 import torch.nn.functional as F
 from torch import nn
 
-from torch_parallelism import (
-    column_parallel_linear,
-    data_parallel_forward,
-    pipeline_forward,
-    row_parallel_linear,
-)
+torch_parallelism = import_module("0_pt_torch_parallelism")
+column_parallel_linear = torch_parallelism.column_parallel_linear
+data_parallel_forward = torch_parallelism.data_parallel_forward
+pipeline_forward = torch_parallelism.pipeline_forward
+row_parallel_linear = torch_parallelism.row_parallel_linear
 
 
 class RecordingModule(nn.Module):

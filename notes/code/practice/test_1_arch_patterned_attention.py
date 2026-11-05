@@ -1,10 +1,13 @@
 import ast
 import inspect
 import textwrap
+from importlib import import_module
 
 import torch
 
-from patterned_attention import patterned_attention_mask
+patterned_attention_mask = import_module(
+    "1_arch_patterned_attention"
+).patterned_attention_mask
 
 
 def reference_patterned_attention_mask(

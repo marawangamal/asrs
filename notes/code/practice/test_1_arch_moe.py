@@ -1,8 +1,9 @@
 from collections.abc import Sequence
+from importlib import import_module
 
 import torch
 
-from moe import mixture_of_experts
+mixture_of_experts = import_module("1_arch_moe").mixture_of_experts
 
 
 def reference_moe(
