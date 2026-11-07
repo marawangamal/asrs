@@ -1,0 +1,7 @@
+{
+  "name": "asrs",
+  "version": "0.2.0",
+  "description": "Agentic spaced repetition: /study quizzes you on markdown notes (FSRS-scheduled), /note turns a conversation into a card.",
+  "author": { "name": "Marawan Gamal" },
+  "repository": "https://github.com/marawangamal/asrs"
+}

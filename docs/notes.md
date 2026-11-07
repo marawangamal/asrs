@@ -1,26 +1,33 @@
 # Notes layout
 
+Your notes repo (the "vault") — the plugin's skills run against the current directory:
+
 ```
-notes/
-├── code/
-│   ├── algos/      deck — LeetCode / coding problems
+my-notes/
+├── notes/
+│   ├── code/algos/     deck — any dir with an index.md is a deck
 │   │   ├── index.md            ← declares heading names + inactive list
 │   │   ├── 146-lru-cache.md    ← one card
-│   │   ├── 211-add-search-words.md
 │   │   └── …
-│   ├── ml/         deck — ML / NumPy patterns
-│   └── basics/     deck — Python fundamentals
-├── math/           deck — optimization / analysis
-├── history.md      append-only review log (used by /study + /study-asrs)
-├── state.db        SQLite — FSRS scheduler state (used by /study only)
-├── .claude/
-│   ├── commands/   skill definitions: note.md, study.md, study-asrs.md
-│   ├── session.py        /study-asrs picker (multiplier-based)
-│   ├── fsrs_session.py   /study picker (FSRS-backed)
-│   ├── _srs/             FSRS scheduler modules (cards/db/scheduler)
-│   ├── session.json       /study-asrs session state (gitignored)
-│   └── fsrs_session.json  /study session state (gitignored)
-└── pyproject.toml
+│   └── math/           deck
+├── history.md          append-only review log (used by /study + /study-asrs)
+├── state.db            SQLite — FSRS scheduler state (gitignore it or commit it, your call)
+└── .claude/
+    ├── settings.json       enables the asrs plugin
+    ├── session.json        /study-asrs session state (gitignore)
+    └── fsrs_session.json   /study session state (gitignore)
+```
+
+The plugin itself (this repo):
+
+```
+asrs/
+├── .claude-plugin/     plugin.json + marketplace.json
+├── commands/           note.md, study.md, study-asrs.md
+└── scripts/
+    ├── session.py        /study-asrs picker (multiplier-based)
+    ├── fsrs_session.py   /study picker (FSRS-backed)
+    └── _srs/             FSRS scheduler modules (cards/db/scheduler)
 ```
 
 ## Decks

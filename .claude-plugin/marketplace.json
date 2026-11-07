@@ -1,0 +1,5 @@
+{
+  "name": "asrs",
+  "owner": { "name": "Marawan Gamal" },
+  "plugins": [{ "name": "asrs", "source": "./", "description": "Agentic spaced repetition over a markdown notes vault." }]
+}

@@ -1,11 +1,8 @@
 [project]
-name = "interviews"
-version = "0.1.0"
-description = "Add your description here"
+name = "asrs"
+version = "0.2.0"
+description = "Agentic spaced repetition for Claude Code"
 requires-python = ">=3.13"
 dependencies = [
     "fsrs>=6.3.1",
-    "numpy>=2.4.4",
-    "pytest>=9.0.3",
-    "torch>=2.11.0",
 ]

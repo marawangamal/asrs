@@ -4,9 +4,9 @@
 
 ```
        ┌────────────────────┐
-user → │  /study            │ ← skill in .claude/commands/study.md
+user → │  /study            │ ← skill in commands/study.md
        └─────────┬──────────┘
-                 │ 1. python3 .claude/fsrs_session.py next [--deck D]
+                 │ 1. python3 scripts/fsrs_session.py next [--deck D]
                  ▼
        ┌────────────────────────────────────────────────┐
        │  fsrs_session.py                               │
@@ -20,7 +20,7 @@ user → │  /study            │ ← skill in .claude/commands/study.md
        skill reads `current`, presents the question, waits for answer,
        grades it, appends to history.md
                  │
-                 │ 2. python3 .claude/fsrs_session.py grade --card P --grade G
+                 │ 2. python3 scripts/fsrs_session.py grade --card P --grade G
                  ▼
        fsrs_session.py:
          • computes card_id from card content
@@ -75,7 +75,7 @@ inputs: deck_filter, size, now
 
 New cards rank as overdue (epoch-min) and are picked first. Among new cards, ties are broken randomly.
 
-## CLI surface (`.claude/fsrs_session.py`)
+## CLI surface (`scripts/fsrs_session.py`)
 
 ```
 next [--deck DECK] [--size N]
@@ -97,7 +97,7 @@ debug --card PATH
     rows for the card.
 ```
 
-## Module layout under `.claude/_srs/`
+## Module layout under `scripts/_srs/`
 
 | File                  | Purpose                                                       |
 | --------------------- | ------------------------------------------------------------- |
